@@ -47,7 +47,7 @@ const chartOptionsRX = computed(() => {
 
 const chartOptions = {
   chart: {
-    type: undefined as ApexChart['type'],
+    type: undefined as 'line' | 'area' | 'bar' | undefined,
     background: 'transparent',
     stacked: false,
     toolbar: {

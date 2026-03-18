@@ -1,16 +1,14 @@
 import { beforeAll, describe, expect, test } from 'vitest';
 
-declare global {
-  var t: (value: string) => string;
-}
-
 let GeneralUpdateSchema: typeof import('../../server/database/repositories/general/types').GeneralUpdateSchema;
 
 beforeAll(async () => {
-  globalThis.t = (value: string) => value;
-  ({ GeneralUpdateSchema } = await import(
-    '../../server/database/repositories/general/types'
-  ));
+  const testGlobals = globalThis as typeof globalThis & {
+    t?: (value: string) => string;
+  };
+  testGlobals.t = (value: string) => value;
+  ({ GeneralUpdateSchema } =
+    await import('../../server/database/repositories/general/types'));
 });
 
 describe('GeneralUpdateSchema', () => {

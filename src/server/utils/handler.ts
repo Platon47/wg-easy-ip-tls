@@ -136,7 +136,7 @@ export const defineMetricsHandler = <
 >(
   type: Metrics,
   handler: MetricsHandler<TReq, TRes>
-  ) => {
+) => {
   return defineEventHandler(async (event) => {
     const metricsConfig = await Database.general.getMetricsConfig();
 

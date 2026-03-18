@@ -77,7 +77,11 @@ const password = ref<string>('');
 const totpRequired = ref(false);
 const totp = ref<string>('');
 
-const _submit = useSubmit(
+type SessionSubmitResponse = {
+  status: 'success' | 'TOTP_REQUIRED' | 'INVALID_TOTP_CODE';
+};
+
+const _submit = useSubmit<SessionSubmitResponse>(
   '/api/session',
   {
     method: 'post',

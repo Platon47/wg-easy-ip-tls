@@ -5,12 +5,16 @@ export const useAuthStore = defineStore('Auth', () => {
   const userData = useState<SharedPublicUser | null>('user-data', () => null);
 
   async function getSession(event?: H3Event) {
-    const fetch = event?.$fetch || $fetch;
     try {
-      const data = await fetch('/api/session', {
+      if (event) {
+        return await event.$fetch<SharedPublicUser>('/api/session', {
+          method: 'get',
+        });
+      }
+
+      return await $fetch<SharedPublicUser>('/api/session', {
         method: 'get',
       });
-      return data;
     } catch {
       return null;
     }

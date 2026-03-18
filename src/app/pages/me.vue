@@ -168,7 +168,17 @@ function updatePassword() {
 
 const twofa = ref<{ key: string; qrcode: string } | null>(null);
 
-const _setup2fa = useSubmit(
+type TotpSetupResponse = {
+  type: 'setup';
+  key: string;
+  uri: string;
+};
+
+type TotpMutationResponse = {
+  type: 'created' | 'deleted';
+};
+
+const _setup2fa = useSubmit<TotpSetupResponse>(
   `/api/me/totp`,
   {
     method: 'post',
@@ -196,7 +206,7 @@ async function setup2fa() {
 
 const code = ref<string>('');
 
-const _enable2fa = useSubmit(
+const _enable2fa = useSubmit<TotpMutationResponse>(
   `/api/me/totp`,
   {
     method: 'post',
@@ -221,7 +231,7 @@ async function enable2fa() {
 
 const disable2faPassword = ref('');
 
-const _disable2fa = useSubmit(
+const _disable2fa = useSubmit<TotpMutationResponse>(
   `/api/me/totp`,
   {
     method: 'post',

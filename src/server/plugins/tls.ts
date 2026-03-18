@@ -16,7 +16,9 @@ export default defineNitroPlugin((nitroApp) => {
   const insecure = process.env.INSECURE === 'true';
 
   if (!legoEnabled || insecure) {
-    console.log('[tls] Running in HTTP mode (LEGO_ENABLED != true or INSECURE=true)');
+    console.log(
+      '[tls] Running in HTTP mode (LEGO_ENABLED != true or INSECURE=true)'
+    );
     return;
   }
 
@@ -24,9 +26,9 @@ export default defineNitroPlugin((nitroApp) => {
   if (!fs.existsSync(CERT_PATH) || !fs.existsSync(KEY_PATH)) {
     console.error(
       '[tls] ERROR: Certificate files not found!\n' +
-      `Expected: ${CERT_PATH}\n` +
-      `${KEY_PATH}\n` +
-      ' Make sure LEGO_IP and LEGO_EMAIL are set correctly.'
+        `Expected: ${CERT_PATH}\n` +
+        `${KEY_PATH}\n` +
+        ' Make sure LEGO_IP and LEGO_EMAIL are set correctly.'
     );
     // Don't crash — Nitro will still start but without TLS if cert is missing
     return;
@@ -35,21 +37,29 @@ export default defineNitroPlugin((nitroApp) => {
   // Read cert info for logging
   try {
     const stat = fs.statSync(CERT_PATH);
-    console.log(`[tls] Certificate loaded: ${CERT_PATH} (modified: ${stat.mtime.toISOString()})`);
-    console.log(`[tls] HTTPS enabled for IP: ${process.env.LEGO_IP || process.env.HOST}`);
+    console.log(
+      `[tls] Certificate loaded: ${CERT_PATH} (modified: ${stat.mtime.toISOString()})`
+    );
+    console.log(
+      `[tls] HTTPS enabled for IP: ${process.env.LEGO_IP || process.env.HOST}`
+    );
   } catch {
     // Non-fatal
   }
 
   // Watch for cert renewal (lego-renew.sh replaces symlink targets every ~5 days)
-  fs.watchFile(CERT_PATH, { interval: 60_000, persistent: false }, (curr, prev) => {
-    if (curr.mtime !== prev.mtime) {
-      console.log(
-        `[tls] Certificate renewed at ${curr.mtime.toISOString()} — ` +
-        'new connections will use the updated cert automatically.'
-      );
+  fs.watchFile(
+    CERT_PATH,
+    { interval: 60_000, persistent: false },
+    (curr, prev) => {
+      if (curr.mtime !== prev.mtime) {
+        console.log(
+          `[tls] Certificate renewed at ${curr.mtime.toISOString()} — ` +
+            'new connections will use the updated cert automatically.'
+        );
+      }
     }
-  });
+  );
 
   nitroApp.hooks.hook('close', () => {
     fs.unwatchFile(CERT_PATH);

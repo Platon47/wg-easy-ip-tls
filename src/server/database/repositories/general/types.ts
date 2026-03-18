@@ -13,20 +13,22 @@ const metricsPassword = z
   .min(1, { message: t('zod.general.metricsPassword') })
   .nullable();
 
-export const GeneralUpdateSchema = z.object({
-  sessionTimeout: sessionTimeout,
-  metricsPrometheus: metricsEnabled,
-  metricsJson: metricsEnabled,
-  metricsPassword: metricsPassword,
-}).superRefine((data, ctx) => {
-  if ((data.metricsPrometheus || data.metricsJson) && !data.metricsPassword) {
-    ctx.addIssue({
-      code: z.ZodIssueCode.custom,
-      path: ['metricsPassword'],
-      message: t('zod.general.metricsPassword'),
-    });
-  }
-});
+export const GeneralUpdateSchema = z
+  .object({
+    sessionTimeout: sessionTimeout,
+    metricsPrometheus: metricsEnabled,
+    metricsJson: metricsEnabled,
+    metricsPassword: metricsPassword,
+  })
+  .superRefine((data, ctx) => {
+    if ((data.metricsPrometheus || data.metricsJson) && !data.metricsPassword) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ['metricsPassword'],
+        message: t('zod.general.metricsPassword'),
+      });
+    }
+  });
 
 export type GeneralUpdateType = z.infer<typeof GeneralUpdateSchema>;
 
