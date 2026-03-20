@@ -12,6 +12,7 @@ export default defineEventHandler(async () => {
     latestRelease: latestRelease,
     updateAvailable,
     insecure,
+    disableIpv6: WG_ENV.DISABLE_IPV6,
     isAwg,
     firewallEnabled: wgInterface.firewallEnabled,
   };

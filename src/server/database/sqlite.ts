@@ -162,5 +162,13 @@ async function disableIpv6(db: DBType) {
     } else {
       DB_DEBUG('IPv6 Post Down hooks already disabled, skipping...');
     }
+
+    DB_DEBUG('Clearing stored client IPv6 addresses...');
+    await tx
+      .update(schema.client)
+      .set({
+        ipv6Address: null,
+      })
+      .execute();
   });
 }

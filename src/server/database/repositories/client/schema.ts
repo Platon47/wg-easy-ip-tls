@@ -21,7 +21,7 @@ export const client = sqliteTable('clients_table', {
     }),
   name: text().notNull(),
   ipv4Address: text('ipv4_address').notNull().unique(),
-  ipv6Address: text('ipv6_address').notNull().unique(),
+  ipv6Address: text('ipv6_address').unique(),
   preUp: text('pre_up').default('').notNull(),
   postUp: text('post_up').default('').notNull(),
   preDown: text('pre_down').default('').notNull(),

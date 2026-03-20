@@ -218,7 +218,7 @@ export const firewall = {
       const destIsIpv6 = isIPv6(baseIp);
 
       if (destIsIpv6) {
-        if (enableIpv6) {
+        if (enableIpv6 && client.ipv6Address) {
           const rules = generateRuleArgs(client.ipv6Address, parsed, comment);
           for (const rule of rules) {
             await exec(`ip6tables ${rule}`);

@@ -37,7 +37,8 @@ const address4 = z
 const address6 = z
   .string({ message: t('zod.client.address6') })
   .min(1, { message: t('zod.client.address6') })
-  .pipe(safeStringRefine);
+  .pipe(safeStringRefine)
+  .nullable();
 
 const filter = z.string().optional();
 

@@ -35,8 +35,9 @@
               label="IPv4"
             />
             <FormTextField
+              v-if="!globalStore.information?.disableIpv6"
               id="ipv6Address"
-              v-model="data.ipv6Address"
+              v-model="ipv6AddressModel"
               label="IPv6"
             />
             <FormInfoField
@@ -221,6 +222,15 @@ const { data: _data, refresh } = await useFetch(`/api/client/${id}`, {
   method: 'get',
 });
 const data = toRef(_data.value);
+
+const ipv6AddressModel = computed({
+  get: () => data.value?.ipv6Address ?? '',
+  set: (value: string) => {
+    if (data.value) {
+      data.value.ipv6Address = value || null;
+    }
+  },
+});
 
 const _submit = useSubmit(
   `/api/client/${id}`,

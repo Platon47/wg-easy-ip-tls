@@ -5,7 +5,12 @@
     <template #description>
       <FormGroup>
         <FormTextField id="ipv4Cidr" v-model="ipv4Cidr" label="IPv4" />
-        <FormTextField id="ipv6Cidr" v-model="ipv6Cidr" label="IPv6" />
+        <FormTextField
+          v-if="showIpv6"
+          id="ipv6Cidr"
+          v-model="ipv6Cidr"
+          label="IPv6"
+        />
       </FormGroup>
     </template>
     <template #actions>
@@ -27,8 +32,10 @@ const props = defineProps<{
   triggerClass?: string;
   ipv4Cidr: string;
   ipv6Cidr: string;
+  showIpv6?: boolean;
 }>();
 
 const ipv4Cidr = ref(props.ipv4Cidr);
 const ipv6Cidr = ref(props.ipv6Cidr);
+const showIpv6 = computed(() => props.showIpv6 ?? true);
 </script>

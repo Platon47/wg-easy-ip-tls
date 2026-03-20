@@ -141,6 +141,7 @@
           trigger-class="col-span-2"
           :ipv4-cidr="data.ipv4Cidr"
           :ipv6-cidr="data.ipv6Cidr"
+          :show-ipv6="!globalStore.information?.disableIpv6"
           @change="changeCidr"
         >
           <FormSecondaryActionField

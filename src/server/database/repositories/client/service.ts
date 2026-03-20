@@ -197,8 +197,9 @@ export class ClientService {
 
       const ipv4Cidr = parseCidr(clientInterface.ipv4Cidr);
       const ipv4Address = nextIP(4, ipv4Cidr, clients);
-      const ipv6Cidr = parseCidr(clientInterface.ipv6Cidr);
-      const ipv6Address = nextIP(6, ipv6Cidr, clients);
+      const ipv6Address = WG_ENV.DISABLE_IPV6
+        ? null
+        : nextIP(6, parseCidr(clientInterface.ipv6Cidr), clients);
 
       return await tx
         .insert(client)
@@ -255,7 +256,11 @@ export class ClientService {
         throw new Error('IPv4 address is not within the CIDR range');
       }
 
-      if (!containsCidr(clientInterface.ipv6Cidr, data.ipv6Address)) {
+      if (
+        !WG_ENV.DISABLE_IPV6 &&
+        data.ipv6Address &&
+        !containsCidr(clientInterface.ipv6Cidr, data.ipv6Address)
+      ) {
         throw new Error('IPv6 address is not within the CIDR range');
       }
 
