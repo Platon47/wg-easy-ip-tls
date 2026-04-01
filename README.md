@@ -1,3 +1,74 @@
+# WireGuard Easy — IP TLS Fork
+
+> **This is a fork of [wg-easy](https://github.com/wg-easy/wg-easy) with built-in TLS support for IP addresses.**
+> It uses [lego](https://github.com/go-acme/lego) (Let's Encrypt ACME client) or pre-provisioned certificates
+> to serve the Web UI over HTTPS without an external reverse proxy.
+
+## TLS Setup
+
+### How it works
+
+HTTPS termination is handled by an internal `tls-proxy.js` node process. It reads your certificates,
+forwards decrypted traffic to the Nitro app server on a local port, and hot-reloads certs on renewal
+without restarting the container.
+
+```
+Client ──HTTPS──> tls-proxy.js :51821 ──HTTP──> Nitro :51822
+```
+
+### Environment variables
+
+| Variable | Default | Description |
+|---|---|---|
+| `LEGO_ENABLED` | `false` | Enable TLS mode. Set `true` to activate cert handling. |
+| `INSECURE` | `false` | Set `true` to disable TLS and run plain HTTP on `PORT`. |
+| `PORT` | `51821` | External port (HTTPS when TLS enabled). |
+| `NITRO_PORT` | `51822` | Internal HTTP port for Nitro (not exposed). |
+| `LEGO_EMAIL` | — | Let's Encrypt account email. Required for AUTO mode. |
+| `LEGO_IP` | — | IPv4 address to obtain the certificate for. Required for AUTO mode. |
+| `LEGO_CHALLENGE` | `http` | ACME challenge type: `http` (port 80) or `tls-alpn` (port 443). |
+| `LEGO_DATA_DIR` | `/root/lego-data` | Directory where lego stores its state. |
+| `LEGO_RENEW_INTERVAL` | `432000` | Renewal check interval in seconds (default: 5 days). |
+
+### MANUAL mode (pre-provisioned certificates)
+
+If you already have certificates from another tool (e.g. x-ui, certbot, acme.sh),
+mount them into the container and set `LEGO_ENABLED=true`:
+
+```yaml
+environment:
+  - LEGO_ENABLED=true
+  - INSECURE=false
+volumes:
+  - /path/to/your/certs:/root/cert/ip:ro
+```
+
+The container expects:
+- `/root/cert/ip/fullchain.pem` — certificate chain
+- `/root/cert/ip/privkey.pem` — private key (`chmod 600` on the host)
+
+Certificates are hot-reloaded on file change (polling interval: 60s), so restarting
+the container after renewal is sufficient but not strictly required.
+
+### AUTO mode (Let's Encrypt via lego)
+
+> **Note:** IP address certificates from Let's Encrypt are issued by [ZeroSSL](https://zerossl.com/)
+> since Let's Encrypt does not support IP SANs. Lego handles this transparently.
+
+```yaml
+environment:
+  - LEGO_ENABLED=true
+  - INSECURE=false
+  - LEGO_EMAIL=your@email.com
+  - LEGO_IP=1.2.3.4
+  - LEGO_CHALLENGE=http   # requires port 80 to be open
+ports:
+  - "80:80"               # needed only for http-01 challenge
+  - "51821:51821/tcp"
+```
+
+---
+
 # WireGuard Easy
 
 [![Build & Publish latest Image](https://github.com/wg-easy/wg-easy/actions/workflows/deploy.yml/badge.svg?branch=production)](https://github.com/wg-easy/wg-easy/actions/workflows/deploy.yml)

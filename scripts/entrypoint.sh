@@ -19,7 +19,7 @@ KEY_FILE="/root/cert/ip/privkey.pem"
 PORT="${PORT:-51821}"
 NITRO_PORT="${NITRO_PORT:-51822}"
 LEGO_ENABLED="${LEGO_ENABLED:-false}"
-INSECURE="${INSECURE:-true}"
+INSECURE="${INSECURE:-false}"
 # Renewal interval in seconds (default 5 days = 432000s)
 LEGO_RENEW_INTERVAL="${LEGO_RENEW_INTERVAL:-432000}"
 
@@ -48,7 +48,10 @@ trap cleanup TERM INT
 
 if [ "$LEGO_ENABLED" = "true" ] && [ "$INSECURE" != "true" ]; then
   # -- TLS mode ---
-  /usr/local/bin/lego-renew.sh
+  timeout 120 /usr/local/bin/lego-renew.sh || {
+    echo "[entrypoint] FATAL: cert validation timed out or failed"
+    exit 1
+  }
 
   # Start background cert renewal loop
   (

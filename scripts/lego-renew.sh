@@ -19,6 +19,12 @@ LEGO_CHALLENGE="${LEGO_CHALLENGE:-http}"
 LEGO_DATA_DIR="${LEGO_DATA_DIR:-/root/lego-data}"
 
 if [ -n "$LEGO_EMAIL" ] && [ -n "$LEGO_IP" ]; then
+  # Validate LEGO_IP looks like an IPv4 address
+  if ! echo "$LEGO_IP" | grep -qE '^[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}$'; then
+    echo "[tls] ERROR: LEGO_IP='$LEGO_IP' does not look like an IPv4 address"
+    exit 1
+  fi
+
   echo "[tls] AUTO mode: running lego to obtain/renew cert for IP $LEGO_IP..."
   mkdir -p "$LEGO_DATA_DIR" "$CERT_DIR"
 
@@ -74,6 +80,13 @@ else
     echo "[tls]   2. Pre-provision certs and mount them at $CERT_DIR (read-only)"
     echo "[tls]   chmod 600 $CERT_DIR/privkey.pem # on the host"
     exit 1
+  fi
+
+  # Warn if certificate expires within 7 days (non-fatal — renewal is external)
+  if command -v openssl > /dev/null 2>&1; then
+    if ! openssl x509 -checkend 604800 -noout -in "$CERT_FILE" 2>/dev/null; then
+      echo "[tls] WARNING: certificate at $CERT_FILE expires within 7 days — renew it soon"
+    fi
   fi
 fi
 

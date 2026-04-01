@@ -13,6 +13,11 @@ services:
       - LEGO_ENABLED=true
       - LEGO_RENEW_INTERVAL=86400
       - NODE_OPTIONS=--no-deprecation
+      # AUTO mode — uncomment and set these to have lego obtain certs automatically:
+      # - LEGO_EMAIL=your@email.com
+      # - LEGO_IP=1.2.3.4
+      # - LEGO_CHALLENGE=http    # http (requires port 80) or tls-alpn (requires port 443)
+      # MANUAL mode (default) — mount pre-provisioned certs at /root/cert/ip (see volumes below)
     networks:
       wg:
         ipv4_address: 10.42.42.42

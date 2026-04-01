@@ -49,7 +49,13 @@ const server = https.createServer(creds, (req, res) => {
       port:     NITRO_PORT,
       path:     req.url,
       method:   req.method,
-      headers:  req.headers,
+      headers:  {
+        ...req.headers,
+        'x-forwarded-for':   req.socket.remoteAddress,
+        'x-real-ip':         req.socket.remoteAddress,
+        'x-forwarded-proto': 'https',
+        'x-forwarded-host':  req.headers.host || '',
+      },
     },
     (proxyRes) => {
       res.writeHead(proxyRes.statusCode, proxyRes.headers);
@@ -67,10 +73,15 @@ const server = https.createServer(creds, (req, res) => {
 // WebSocket upgrade support (wg-easy uses WS for live updates)
 server.on('upgrade', (req, socket, head) => {
   const conn = net.connect(NITRO_PORT, '127.0.0.1', () => {
+    // Flatten headers: multiple values for the same header name become separate lines
     const headers = Object.entries(req.headers)
-      .map(([k, v]) => `${k}: ${v}`)
+      .flatMap(([k, v]) => Array.isArray(v) ? v.map(val => `${k}: ${val}`) : [`${k}: ${v}`])
+      .concat([
+        `x-forwarded-for: ${req.socket.remoteAddress}`,
+        `x-forwarded-proto: https`,
+      ])
       .join('\r\n');
-    conn.write(`GET ${req.url} HTTP/1.1\r\n${headers}\r\n\r\n`);
+    conn.write(`${req.method} ${req.url} HTTP/1.1\r\n${headers}\r\n\r\n`);
     if (head && head.length) conn.write(head);
     socket.pipe(conn);
     conn.pipe(socket);
