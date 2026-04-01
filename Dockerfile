@@ -111,5 +111,7 @@ ENV DISABLE_IPV6=false
 
 LABEL org.opencontainers.image.source=https://github.com/Platon47/wg-easy-ip-tls
 
-# Use dumb-init as PID 1 for proper signal forwarding and zombie reaping
-CMD ["/usr/bin/dumb-init", "/usr/local/bin/entrypoint.sh"]
+# Override base image ENTRYPOINT so dumb-init is unconditionally PID 1.
+# Using ENTRYPOINT (not CMD) prevents node:alpine's docker-entrypoint.sh
+# from wrapping our process — which would break no-new-privileges secopt.
+ENTRYPOINT ["/usr/bin/dumb-init", "/usr/local/bin/entrypoint.sh"]
